@@ -18,6 +18,9 @@ Next-Gen Log Viewer is a powerful, user-friendly desktop application designed to
     - Auto-detects log patterns and formats.
 
 ## Installation
+### MacOS Application
+Download the "Log Viewer-1.0.dmg" file.
+
 ### Prerequisites
 - JDK 11 or later
 - Scala & SBT installed
@@ -25,6 +28,17 @@ Next-Gen Log Viewer is a powerful, user-friendly desktop application designed to
 ### Run the Application
 ```sh
 sbt run
+```
+
+### Build an Application Executable
+```sh
+sbt assembly
+
+jpackage --name "Log Viewer" \
+         --input target/scala-2.13/ \
+         --main-jar Log-Viewer-assembly-0.1-SNAPSHOT.jar \
+         --main-class sun.scalafx.LogViewerApp \
+         --type dmg  # Use "msi" for Windows, "deb" for Linux
 ```
 
 ## How to Use

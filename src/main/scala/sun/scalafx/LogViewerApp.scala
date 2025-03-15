@@ -48,7 +48,7 @@ object LogViewer extends JFXApp3 {
 
   override def start(): Unit = {
     stage = new PrimaryStage {
-      title = "Databricks Log Viewer"
+      title = "Log Viewer"
       width = 900
       height = 700
 
