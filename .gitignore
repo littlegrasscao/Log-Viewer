@@ -1,0 +1,51 @@
+# === Scala & SBT ===
+/target/                   # Build artifacts (classes, JARs, etc.)
+/project/target/           # SBT project-specific build artifacts
+/metastore_db/             # Local Metastore DB from Spark
+/.metastore_lock           # Spark metastore lock
+
+# === IntelliJ IDEA ===
+.idea/                     # IntelliJ project-specific files
+*.iml                      # Module files
+*.iws                      # Workspace files
+/out/                      # IntelliJ compile output
+
+# === VS Code ===
+.vscode/                   # VS Code settings and extensions
+
+# === Build Tools ===
+/lib_managed/              # Managed libraries
+/.bloop/                   # Bloop build server config
+/.metals/                  # Metals config (Scala language server)
+/.bsp/                     # Build Server Protocol config
+/.ammonite/                # Ammonite REPL cache
+
+# === Logs & Temporary Files ===
+/logs/                     # Log files
+*.log                      # Individual log files
+/tmp/                      # Temp files
+/spark-warehouse/          # Spark SQL warehouse directory
+
+# === sbt-related Files ===
+/sbt/                      # SBT launcher files
+/.history/                 # sbt shell history
+/.ivy2/                    # Ivy dependency cache
+/.coursier/                # Coursier dependency cache
+
+# === OS Specific ===
+.DS_Store                  # macOS metadata
+Thumbs.db                  # Windows thumbnail cache
+
+# === Testing/Reports ===
+/test-output/              # Test reports
+/target/test-reports/      # Test output directory
+
+# === ScalaDocs ===
+/target/scala-*/api/       # ScalaDocs output
+
+# === Jupyter/Databricks Notebooks ===
+/.ipynb_checkpoints/       # Jupyter notebook checkpoints
+/databricks/               # Databricks-specific metadata
+
+# === Misc ===
+/.idea_modules/            # IntelliJ modules metadata

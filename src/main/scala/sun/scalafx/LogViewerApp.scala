@@ -240,6 +240,8 @@ object LogViewer extends JFXApp3 {
     Try {
       // Filter logs based on a pattern: timestamp level service file(optional) [attributes](optional) : message
       val logLineRegex = """(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\s+([A-Z]+)\s+([a-zA-Z0-9$-:]+)\s+([a-zA-Z0-9._:-]+)?\s*+(\[.*?\][a-zA-Z0-9._:-]?)?\s*:\s+(.*?)""".r
+      // Service name may contain special characters like [ ]
+      val complexServiceNameRegex = """(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\s+([A-Z]+)\s+([a-zA-Z0-9$-:]+)(\[.*?\])\s+([a-zA-Z0-9._:-]+)?\s*(\[.*?\])?\s*:\s+(.*)""".r
       logEntries.clear()
 
       var lineNumber = 1 // Row counter
@@ -248,24 +250,6 @@ object LogViewer extends JFXApp3 {
           case logLineRegex(timestampStr, level, service, file, attributes, message) =>
             Try {
               val timestamp = LocalDateTime.parse(timestampStr, DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"))
-
-              // Parse attributes only if they exist
-              val attributeMap = if (attributes != null && attributes.nonEmpty) {
-                attributes.split("\\s+")
-                  .map(attr => {
-                    val parts = attr.split("=", 2)
-                    if (parts.length == 2) (parts(0), parts(1)) else (attr, "")
-                  })
-                  .toMap
-              } else {
-                Map.empty[String, String]
-              }
-
-              // TODO: Add Ids into UI tabs
-              val tenant = attributeMap.getOrElse("tenant", "")
-              val traceId = attributeMap.getOrElse("traceId", "")
-              val requestId = attributeMap.getOrElse("requestId", "")
-
               logEntries += LogEntry(lineNumber, timestamp, level, service, message)
               lineNumber += 1 // Increment row count
             }.recover {
@@ -273,10 +257,35 @@ object LogViewer extends JFXApp3 {
                 // Handle timestamp parsing errors
                 println(s"Error parsing timestamp: $timestampStr - ${e.getMessage}")
             }
+          case complexServiceNameRegex(timestampStr, level, service, extra, file, attributes, message) =>
+            // timestamp INFO service[extra info] [attributes]: message
+            Try {
+              val timestamp = LocalDateTime.parse(timestampStr, DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"))
+              logEntries += LogEntry(
+                lineNumber,
+                timestamp,
+                level,
+                service,
+                message
+              )
+              lineNumber += 1
+            }.recover {
+              case e: Exception =>
+                println(s"Error parsing new log format timestamp: $timestampStr - ${e.getMessage}")
+            }
           case _ =>
-            // For lines that don't match the pattern, we could either ignore them or add them as continuation
-            // Usually these are continuation lines like stack traces.
-            if (logEntries.nonEmpty) {
+            // Handle unmatched lines - if empty, add as new entry
+            if (logEntries.isEmpty) {
+              logEntries += LogEntry(
+                lineNumber,
+                LocalDateTime.MIN,
+                "",
+                "",
+                line
+              )
+              lineNumber += 1
+            } else {
+              // Continuation or stack trace addition to the last log entry
               val lastEntry = logEntries.last
               val updatedEntry = LogEntry(
                 lastEntry.id,
