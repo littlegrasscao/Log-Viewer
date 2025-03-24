@@ -1,24 +1,24 @@
 [0m[[0m[0mdebug[0m] [0m[0mSeparate classpath projects and all dependencies start:[0m
 [0m[[0m[0mdebug[0m] [0m[0mSeparate classpath projects and all dependencies end. Took 4 ms[0m
 [0m[[0m[0mdebug[0m] [0m[0mCollect only external dependencies start:[0m
-[0m[[0m[0mdebug[0m] [0m[0mCollect only external dependencies end. Took 0 ms[0m
+[0m[[0m[0mdebug[0m] [0m[0mCollect only external dependencies end. Took 1 ms[0m
 [0m[[0m[0mdebug[0m] [0m[0mCollect excluded jar names start:[0m
 [0m[[0m[0mdebug[0m] [0m[0mCollect excluded jar names end. Took 0 ms[0m
 [0m[[0m[0mdebug[0m] [0m[0mFilter jars start:[0m
 [0m[[0m[0mdebug[0m] [0m[0mFilter jars end. Took 0 ms[0m
 [0m[[0m[0mdebug[0m] [0m[0mCollect and shade project classes start:[0m
-[0m[[0m[0mdebug[0m] [0m[0mCollect and shade project classes end. Took 0 ms[0m
+[0m[[0m[0mdebug[0m] [0m[0mCollect and shade project classes end. Took 1 ms[0m
 [0m[[0m[0mdebug[0m] [0m[0mCollect and shade dependency entries start:[0m
 [0m[[0m[0mdebug[0m] [0m[0mCollect and shade dependency entries end. Took 9 ms[0m
 [0m[[0m[0mdebug[0m] [0m[0mCollect renames start:[0m
-[0m[[0m[0mdebug[0m] [0m[0mCollect renames end. Took 13 ms[0m
+[0m[[0m[0mdebug[0m] [0m[0mCollect renames end. Took 12 ms[0m
 [0m[[0m[0mdebug[0m] [0m[0mProcess renames start:[0m
-[0m[[0m[0mdebug[0m] [0m[0mProcess renames end. Took 8 ms[0m
+[0m[[0m[0mdebug[0m] [0m[0mProcess renames end. Took 9 ms[0m
 [0m[[0m[0mdebug[0m] [0m[0mCollect all merge strategies for cache check start:[0m
-[0m[[0m[0mdebug[0m] [0m[0mCollect all merge strategies for cache check end. Took 16 ms[0m
+[0m[[0m[0mdebug[0m] [0m[0mCollect all merge strategies for cache check end. Took 25 ms[0m
 [0m[[0m[0mdebug[0m] [0m[0mBuilding assembly jar due to changed inputs...[0m
 [0m[[0m[0mdebug[0m] [0m[0mMerge all conflicting jar entries (including those renamed) start:[0m
-[0m[[0m[0mdebug[0m] [0m[0mMerge all conflicting jar entries (including those renamed) end. Took 24 ms[0m
+[0m[[0m[0mdebug[0m] [0m[0mMerge all conflicting jar entries (including those renamed) end. Took 25 ms[0m
 [0m[[0m[0mdebug[0m] [0m[0mReport merge results start:[0m
 [0m[[0m[0minfo[0m] [0m[0m11 file(s) merged using strategy 'First' (Run the task at debug level to see the details)[0m
 [0m[[0m[0mdebug[0m] [0m[0m[0m
@@ -213,16 +213,16 @@
 [0m[[0m[0mdebug[0m] [0m[0mMerge origins:[0m
 [0m[[0m[0mdebug[0m] [0m[0m  Jar name = javafx-graphics-21.jar, jar org = org.openjfx, entry target = META-INF/substrate/config/reflectionconfig-x86_64-darwin.json[0m
 [0m[[0m[0mdebug[0m] [0m[0m  Jar name = javafx-web-21.jar, jar org = org.openjfx, entry target = META-INF/substrate/config/reflectionconfig-x86_64-darwin.json[0m
-[0m[[0m[0mdebug[0m] [0m[0mReport merge results end. Took 6 ms[0m
+[0m[[0m[0mdebug[0m] [0m[0mReport merge results end. Took 7 ms[0m
 [0m[[0m[0mdebug[0m] [0m[0mFinding remaining conflicts that were not merged start:[0m
 [0m[[0m[0mdebug[0m] [0m[0mFinding remaining conflicts that were not merged end. Took 41 ms[0m
 [0m[[0m[0mdebug[0m] [0m[0mSort/Parallelize merged entries start:[0m
-[0m[[0m[0mdebug[0m] [0m[0mSort/Parallelize merged entries end. Took 10 ms[0m
+[0m[[0m[0mdebug[0m] [0m[0mSort/Parallelize merged entries end. Took 13 ms[0m
 [0m[[0m[0mdebug[0m] [0m[0mCreate jar start:[0m
-[0m[[0m[0mdebug[0m] [0m[0mCreate jar end. Took 3020 ms[0m
+[0m[[0m[0mdebug[0m] [0m[0mCreate jar end. Took 3189 ms[0m
 [0m[[0m[0mdebug[0m] [0m[0mHash newly-built Jar start:[0m
-[0m[[0m[0mdebug[0m] [0m[0mHash newly-built Jar end. Took 30 ms[0m
+[0m[[0m[0mdebug[0m] [0m[0mHash newly-built Jar end. Took 32 ms[0m
 [0m[[0m[0minfo[0m] [0m[0mBuilt: /Users/sun.cao/Desktop/Log-Viewer/target/scala-2.13/Log-Viewer-assembly-0.1-SNAPSHOT.jar[0m
-[0m[[0m[0minfo[0m] [0m[0mJar hash: b86ab1b803a77cb27598f52c81ac56b52b488e96[0m
+[0m[[0m[0minfo[0m] [0m[0mJar hash: c148f500c0ef5b4a3f73008c99975f2f245ce8e6[0m
 [0m[[0m[0mdebug[0m] [0m[0mClose library jar references start:[0m
-[0m[[0m[0mdebug[0m] [0m[0mClose library jar references end. Took 0 ms[0m
+[0m[[0m[0mdebug[0m] [0m[0mClose library jar references end. Took 1 ms[0m

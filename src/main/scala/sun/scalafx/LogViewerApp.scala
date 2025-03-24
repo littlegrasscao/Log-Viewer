@@ -108,6 +108,7 @@ object LogViewer extends JFXApp3 {
           cellValueFactory = { cellData =>
             cellData.value.timestampProperty
           }
+          sortable = true
         },
         new TableColumn[LogEntry, String] {
           text = "Level"
@@ -135,6 +136,7 @@ object LogViewer extends JFXApp3 {
             }
           }
           }
+          sortable = false
         },
         new TableColumn[LogEntry, String] {
           text = "Source"
@@ -142,6 +144,7 @@ object LogViewer extends JFXApp3 {
           cellValueFactory = { cellData =>
             cellData.value.sourceProperty
           }
+          sortable = false
         },
         new TableColumn[LogEntry, String] {
           text = "Message"
@@ -149,6 +152,7 @@ object LogViewer extends JFXApp3 {
           cellValueFactory = { cellData =>
             cellData.value.messageProperty
           }
+          sortable = false
         }
       )
     }
@@ -242,6 +246,8 @@ object LogViewer extends JFXApp3 {
       val logLineRegex = """(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\s+([A-Z]+)\s+([a-zA-Z0-9$-:]+)\s+([a-zA-Z0-9._:-]+)?\s*+(\[.*?\][a-zA-Z0-9._:-]?)?\s*:\s+(.*?)""".r
       // Service name may contain special characters like [ ]
       val complexServiceNameRegex = """(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\s+([A-Z]+)\s+([a-zA-Z0-9$-:]+)(\[.*?\])\s+([a-zA-Z0-9._:-]+)?\s*(\[.*?\])?\s*:\s+(.*)""".r
+      // [cluster prefix] before timestamp
+      val clusterPrefixRegex = """(\[.*?\])\s+(\d{2}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\s+([A-Z]+)\s+([a-zA-Z0-9$-:]+):\s+(.*)""".r
       logEntries.clear()
 
       var lineNumber = 1 // Row counter
@@ -266,6 +272,22 @@ object LogViewer extends JFXApp3 {
                 timestamp,
                 level,
                 service,
+                message
+              )
+              lineNumber += 1
+            }.recover {
+              case e: Exception =>
+                println(s"Error parsing new log format timestamp: $timestampStr - ${e.getMessage}")
+            }
+          case clusterPrefixRegex(cluster, timestampStr, level, service, message) =>
+            // [cluster] timestamp INFO service: message
+            Try {
+              val timestamp = LocalDateTime.parse(timestampStr, DateTimeFormatter.ofPattern("yy/MM/dd HH:mm:ss"))
+              logEntries += LogEntry(
+                lineNumber,
+                timestamp,
+                level,
+                s"${cluster} ${service}",
                 message
               )
               lineNumber += 1
