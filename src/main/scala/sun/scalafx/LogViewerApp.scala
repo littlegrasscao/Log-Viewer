@@ -247,7 +247,7 @@ object LogViewer extends JFXApp3 {
       // Service name may contain special characters like [ ]
       val complexServiceNameRegex = """(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\s+([A-Z]+)\s+([a-zA-Z0-9$-:]+)(\[.*?\])\s+([a-zA-Z0-9._:-]+)?\s*(\[.*?\])?\s*:\s+(.*)""".r
       // Timestamp contains milliseconds
-      val TimeMilliRegex = """(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2}.\d{3})\s([A-Z]+)\s([a-zA-Z0-9$-:.]+)(\[.*?\])\s*([a-zA-Z0-9._:-]+)?\s*(\[.*?\])?\s*:\s+(.*)""".r
+      val TimeMilliRegex = """(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2}.\d{3})\s([A-Z]+)\s([a-zA-Z0-9$-:._]+)(\[.*?\])\s*([a-zA-Z0-9._:-]+)?\s*(\[.*?\])?\s*:\s+(.*)""".r
       // [cluster prefix] before timestamp
       val clusterPrefixRegex = """(\[.*?\])\s+(\d{2}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\s+([A-Z]+)\s+([a-zA-Z0-9$-:]+):\s+(.*)""".r
       logEntries.clear()
