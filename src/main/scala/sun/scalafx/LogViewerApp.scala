@@ -250,6 +250,8 @@ object LogViewer extends JFXApp3 {
       val TimeMilliRegex = """(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2}.\d{3})\s([A-Z]+)\s([a-zA-Z0-9$-:._]+)(\[.*?\])\s*([a-zA-Z0-9._:-]+)?\s*(\[.*?\])?\s*:\s+(.*)""".r
       // [cluster prefix] before timestamp
       val clusterPrefixRegex = """(\[.*?\])\s+(\d{2}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\s+([A-Z]+)\s+([a-zA-Z0-9$-:]+):\s+(.*)""".r
+      // Driver Log
+      val driverLogRegex = """(\d{2}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\s+([A-Z]+)\s+([a-zA-Z0-9$-:]+)\s*:\s+(.*?)""".r
       logEntries.clear()
 
       var lineNumber = 1 // Row counter
@@ -312,6 +314,16 @@ object LogViewer extends JFXApp3 {
             }.recover {
               case e: Exception =>
                 println(s"Error parsing new log format timestamp: $timestampStr - ${e.getMessage}")
+            }
+          case driverLogRegex(timestampStr, level, service, message) =>
+            Try {
+              val timestamp = LocalDateTime.parse(timestampStr, DateTimeFormatter.ofPattern("yy/MM/dd HH:mm:ss"))
+              logEntries += LogEntry(lineNumber, timestamp, level, service, message)
+              lineNumber += 1 // Increment row count
+            }.recover {
+              case e: Exception =>
+                // Handle timestamp parsing errors
+                println(s"Error parsing timestamp: $timestampStr - ${e.getMessage}")
             }
           case _ =>
             // Handle unmatched lines - if empty, add as new entry
