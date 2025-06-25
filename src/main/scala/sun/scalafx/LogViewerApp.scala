@@ -248,6 +248,8 @@ object LogViewer extends JFXApp3 {
       val complexServiceNameRegex = """(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\s+([A-Z]+)\s+([a-zA-Z0-9$-:]+)(\[.*?\])\s+([a-zA-Z0-9._:-]+)?\s*(\[.*?\])?\s*:\s+(.*)""".r
       // Timestamp contains milliseconds
       val TimeMilliRegex = """(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2}.\d{3})\s([A-Z]+)\s([a-zA-Z0-9$-:._]+)(\[.*?\])\s*([a-zA-Z0-9._:-]+)?\s*(\[.*?\])?\s*:\s+(.*)""".r
+      // Timestamp contains milliseconds with []
+      val TimeMilliWithBracketRegex = """(\d{4}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2}.\d{3})\s([A-Z]+)\s([a-zA-Z0-9$-:._]+)\s*(\[.*?\])\s*:\s+(.*)""".r
       // [cluster prefix] before timestamp
       val clusterPrefixRegex = """(\[.*?\])\s+(\d{2}/\d{2}/\d{2}\s\d{2}:\d{2}:\d{2})\s+([A-Z]+)\s+([a-zA-Z0-9$-:]+):\s+(.*)""".r
       // Driver Log
@@ -271,6 +273,22 @@ object LogViewer extends JFXApp3 {
             // timestamp INFO service[extra info] [attributes]: message
             Try {
               val timestamp = LocalDateTime.parse(timestampStr, DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"))
+              logEntries += LogEntry(
+                lineNumber,
+                timestamp,
+                level,
+                service,
+                message
+              )
+              lineNumber += 1
+            }.recover {
+              case e: Exception =>
+                println(s"Error parsing new log format timestamp: $timestampStr - ${e.getMessage}")
+            }
+          case TimeMilliWithBracketRegex(timestampStr, level, service, file, message) =>
+            // timestamp-ms INFO service [file]: message
+            Try {
+              val timestamp = LocalDateTime.parse(timestampStr, DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss.SSS"))
               logEntries += LogEntry(
                 lineNumber,
                 timestamp,
