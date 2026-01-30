@@ -53,13 +53,58 @@ object LogViewer extends JFXApp3 {
   // ============================================================================
 
   override def start(): Unit = {
+    // Set macOS Dock icon (must be done before stage is shown)
+    setDockIcon()
+
     stage = new PrimaryStage {
       title = AppConfig.Window.Title
       width = AppConfig.Window.Width
       height = AppConfig.Window.Height
+
+      // Set window icons (for title bar)
+      icons ++= loadAppIcons()
+
       scene = new Scene {
         root = buildMainLayout()
       }
+    }
+  }
+
+  /**
+   * Sets the macOS Dock icon using java.awt.Taskbar API.
+   * This affects the Dock and App Switcher (Cmd+Tab).
+   */
+  private def setDockIcon(): Unit = {
+    Try {
+      if (java.awt.Taskbar.isTaskbarSupported) {
+        val taskbar = java.awt.Taskbar.getTaskbar
+        if (taskbar.isSupported(java.awt.Taskbar.Feature.ICON_IMAGE)) {
+          val iconStream = getClass.getResourceAsStream("/icons/app-icon-256.png")
+          if (iconStream != null) {
+            val image = javax.imageio.ImageIO.read(iconStream)
+            taskbar.setIconImage(image)
+            iconStream.close()
+          }
+        }
+      }
+    }.recover {
+      case e: Exception =>
+        // Silently ignore - Dock icon is optional
+        println(s"Could not set Dock icon: ${e.getMessage}")
+    }
+  }
+
+  /**
+   * Loads application icons from resources.
+   * Provides multiple sizes for different display contexts (taskbar, window, dock).
+   */
+  private def loadAppIcons(): Seq[javafx.scene.image.Image] = {
+    val iconSizes = Seq("16", "32", "64", "128", "256")
+    iconSizes.flatMap { size =>
+      Try {
+        val stream = getClass.getResourceAsStream(s"/icons/app-icon-$size.png")
+        if (stream != null) Some(new javafx.scene.image.Image(stream)) else None
+      }.toOption.flatten
     }
   }
 

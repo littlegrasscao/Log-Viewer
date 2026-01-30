@@ -8,7 +8,14 @@ package sun.scalafx
  */
 object LogViewerApp {
 
+  // Application name shown in macOS Dock and menu bar
+  private val AppName = "Log Viewer"
+
   def main(args: Array[String]): Unit = {
+    // Set macOS application name (must be before AWT/JavaFX initialization)
+    System.setProperty("apple.awt.application.name", AppName)
+    System.setProperty("apple.laf.useScreenMenuBar", "true")
+    
     LogViewer.main(args)
   }
 }
