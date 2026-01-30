@@ -7,9 +7,10 @@ import scalafx.collections.ObservableBuffer
 import scalafx.event.ActionEvent
 import scalafx.geometry.{Insets, Orientation, Pos}
 import scalafx.scene.control._
+import scalafx.scene.input.{Clipboard, ClipboardContent}
 import scalafx.scene.layout._
 import sun.scalafx.config.AppConfig
-import sun.scalafx.config.AppConfig.{ColumnWidths, LevelStyles, Styles}
+import sun.scalafx.config.AppConfig.{ColumnWidths, HighlightColors, LevelStyles, Styles}
 import sun.scalafx.model.{LogEntry, LogTabState}
 
 /**
@@ -77,28 +78,190 @@ object UIComponents {
   }
 
   // ============================================================================
+  // Highlight Bar Components
+  // ============================================================================
+
+  /**
+   * Creates the highlight bar showing current highlight words as colored chips.
+   * Each chip can be clicked to remove the highlight.
+   *
+   * @param tabState The tab state containing highlight words
+   * @param refreshTable Callback to refresh table display after highlight changes
+   * @return HBox containing highlight controls
+   */
+  def createHighlightBar(tabState: LogTabState, refreshTable: () => Unit): HBox = {
+    val highlightLabel = new Label("Highlights:")
+
+    // Container for highlight chips (rebuilt when highlights change)
+    val chipsContainer = new HBox {
+      spacing = 6
+      alignment = Pos.CenterLeft
+    }
+
+    // Text field to manually add highlight words
+    val addHighlightField = new TextField {
+      promptText = "Add word..."
+      prefWidth = 120
+      onAction = (_: ActionEvent) => {
+        if (text.value.trim.nonEmpty) {
+          tabState.addHighlight(text.value)
+          text = ""
+          refreshTable()
+        }
+      }
+    }
+
+    val addButton = new Button("+") {
+      onAction = (_: ActionEvent) => {
+        if (addHighlightField.text.value.trim.nonEmpty) {
+          tabState.addHighlight(addHighlightField.text.value)
+          addHighlightField.text = ""
+          refreshTable()
+        }
+      }
+    }
+
+    // Toggle button for showing only highlighted entries
+    val showOnlyButton: ToggleButton = new ToggleButton("Highlighted Only") {
+      selected = false
+      style = "-fx-font-size: 11px;"
+      tooltip = new Tooltip("Toggle to show only highlighted rows")
+      onAction = (_: ActionEvent) => {
+        tabState.showHighlightedOnly = selected.value
+        tabState.applyFilters()
+        refreshTable()
+      }
+    }
+
+    val clearAllButton = new Button("Clear All") {
+      onAction = (_: ActionEvent) => {
+        tabState.clearHighlights()
+        tabState.showHighlightedOnly = false
+        showOnlyButton.selected = false
+        tabState.applyFilters()
+        refreshTable()
+      }
+    }
+
+    // Function to rebuild chip display
+    def rebuildChips(): Unit = {
+      chipsContainer.children.clear()
+      tabState.highlightWords.zipWithIndex.foreach { case (word, idx) =>
+        val chip = new Label(s"$word  \u00D7") {  // × symbol for remove
+          style = HighlightColors.chipStyle(idx)
+          cursor = scalafx.scene.Cursor.Hand
+          onMouseClicked = _ => {
+            tabState.removeHighlight(word)
+            // If no more highlights, turn off "highlighted only" mode
+            if (tabState.highlightWords.isEmpty) {
+              tabState.showHighlightedOnly = false
+              showOnlyButton.selected = false
+            }
+            tabState.applyFilters()
+            refreshTable()
+          }
+        }
+        // Add tooltip explaining how to remove
+        chip.tooltip = new Tooltip(s"Click to remove '$word'")
+        chipsContainer.children.add(chip)
+      }
+    }
+
+    // Rebuild chips when highlight words change
+    tabState.highlightWords.onChange { (_, _) =>
+      rebuildChips()
+    }
+
+    // Initial build
+    rebuildChips()
+
+    new HBox {
+      padding = Insets(6, 10, 6, 10)
+      spacing = 10
+      alignment = Pos.CenterLeft
+      style = "-fx-background-color: #f0f5ff; -fx-border-color: #d0d8e8; -fx-border-width: 0 0 1 0;"
+      children = Seq(
+        highlightLabel,
+        chipsContainer,
+        new Region { hgrow = Priority.Always },
+        showOnlyButton,
+        new Separator { orientation = Orientation.Vertical },
+        addHighlightField,
+        addButton,
+        new Separator { orientation = Orientation.Vertical },
+        clearAllButton
+      )
+    }
+  }
+
+  // ============================================================================
   // Log Table Components
   // ============================================================================
 
   /**
-   * Creates the log entries table with all columns.
+   * Creates the log entries table with all columns and row highlighting support.
    *
    * @param tabState The tab state containing entries to display
    * @return Configured TableView
    */
-  def createLogTable(tabState: LogTabState): TableView[LogEntry] = new TableView[LogEntry] {
-    items = tabState.filteredEntries
-    placeholder = new Label("No log entries loaded.")
+  def createLogTable(tabState: LogTabState): TableView[LogEntry] = {
+    val table = new TableView[LogEntry] {
+      items = tabState.filteredEntries
+      placeholder = new Label("No log entries loaded.")
 
-    columns ++= List(
-      createIdColumn(),
-      createTimestampColumn(),
-      createLevelColumn(),
-      createSourceColumn(),
-      createMessageColumn()
-    )
+      columns ++= List(
+        createIdColumn(),
+        createTimestampColumn(),
+        createLevelColumn(),
+        createSourceColumn(tabState),
+        createMessageColumn(tabState)
+      )
 
-    selectionModel().selectionMode = SelectionMode.Single
+      selectionModel().selectionMode = SelectionMode.Single
+
+      // Row factory for applying highlight colors
+      rowFactory = { _ =>
+        new TableRow[LogEntry] {
+          item.onChange { (_, _, entry) =>
+            updateRowStyle(entry)
+          }
+
+          // Also update when highlight words change
+          tabState.highlightWords.onChange { (_, _) =>
+            updateRowStyle(item.value)
+          }
+
+          // Update style when selection changes to maintain readability
+          selected.onChange { (_, _, _) =>
+            updateRowStyle(item.value)
+          }
+
+          private def updateRowStyle(entry: LogEntry): Unit = {
+            if (entry != null) {
+              tabState.getHighlightIndex(entry) match {
+                case Some(idx) => style = HighlightColors.rowStyle(idx, selected.value)
+                case None      => style = ""
+              }
+            } else {
+              style = ""
+            }
+          }
+        }
+      }
+    }
+
+    table
+  }
+
+  /**
+   * Refreshes the table display by triggering a re-render.
+   * Call this after highlight changes to update row colors.
+   */
+  def refreshTableHighlights(table: TableView[LogEntry]): Unit = {
+    // Force refresh by toggling items
+    val currentItems = table.items.value
+    table.items = null
+    table.items = currentItems
   }
 
   private def createIdColumn(): TableColumn[LogEntry, Number] = {
@@ -145,21 +308,81 @@ object UIComponents {
     }
   }
 
-  private def createSourceColumn(): TableColumn[LogEntry, String] = {
+  private def createSourceColumn(tabState: LogTabState): TableColumn[LogEntry, String] = {
     new TableColumn[LogEntry, String] {
       text = "Source"
       prefWidth = ColumnWidths.Source
       sortable = false
       cellValueFactory = _.value.sourceProperty
+
+      // Cell factory with context menu for highlighting
+      cellFactory = { _: TableColumn[LogEntry, String] =>
+        createHighlightableCell(tabState, _.source)
+      }
     }
   }
 
-  private def createMessageColumn(): TableColumn[LogEntry, String] = {
+  private def createMessageColumn(tabState: LogTabState): TableColumn[LogEntry, String] = {
     new TableColumn[LogEntry, String] {
       text = "Message"
       prefWidth = ColumnWidths.Message
       sortable = false
       cellValueFactory = _.value.messageProperty
+
+      // Cell factory with context menu for highlighting
+      cellFactory = { _: TableColumn[LogEntry, String] =>
+        createHighlightableCell(tabState, _.message)
+      }
+    }
+  }
+
+  /**
+   * Creates a table cell with context menu for adding highlights.
+   * Supports selecting text and adding it to highlights.
+   */
+  private def createHighlightableCell(
+    tabState: LogTabState,
+    textExtractor: LogEntry => String
+  ): TableCell[LogEntry, String] = {
+    new TableCell[LogEntry, String] {
+      item.onChange { (_, _, newValue) =>
+        if (newValue != null) {
+          text = newValue
+        } else {
+          text = ""
+        }
+      }
+
+      // Context menu for highlight actions
+      contextMenu = new ContextMenu {
+        items ++= Seq(
+          new MenuItem("Add to Highlights") {
+            onAction = (_: ActionEvent) => {
+              val selectedText = getSelectedTextOrCellText()
+              if (selectedText.nonEmpty) {
+                tabState.addHighlight(selectedText)
+                // Table will auto-refresh via observable binding
+              }
+            }
+          },
+          new MenuItem("Copy") {
+            onAction = (_: ActionEvent) => {
+              val selectedText = getSelectedTextOrCellText()
+              if (selectedText.nonEmpty) {
+                val clipboard = Clipboard.systemClipboard
+                val content = new ClipboardContent()
+                content.putString(selectedText)
+                clipboard.setContent(content)
+              }
+            }
+          }
+        )
+      }
+
+      private def getSelectedTextOrCellText(): String = {
+        // If there's selected text in the scene, use that; otherwise use cell text
+        Option(text.value).getOrElse("")
+      }
     }
   }
 

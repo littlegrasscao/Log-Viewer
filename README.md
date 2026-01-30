@@ -10,6 +10,11 @@ A powerful, user-friendly desktop application for log analysis built with **Scal
   - Filter by log level (INFO, WARN, ERROR, DEBUG)
   - Keyword search for quickly locating relevant logs
   - Real-time filtering as you type
+- **Keyword Highlighting** (New in v2.1):
+  - Highlight multiple keywords with distinct colors (per-tab)
+  - Right-click any cell to add words to highlights
+  - "Highlighted Only" toggle to filter and show only matching rows
+  - Up to 8 color-coded highlight groups
 - **User-Friendly UI**:
   - Logs displayed in a structured table format
   - Color-coded log levels for better visibility
@@ -29,13 +34,11 @@ A powerful, user-friendly desktop application for log analysis built with **Scal
 
 Download the prebuilt DMG installer:
 
-**[Log Viewer-2.0.0.dmg](Log%20Viewer-2.0.0.dmg)**
+**[Log Viewer-2.1.0.dmg](Log%20Viewer-2.1.0.dmg)**
 
 1. Download and open the DMG file
 2. Drag "Log Viewer" to your Applications folder
 3. If macOS blocks the app, go to **System Settings → Privacy & Security** and click "Open Anyway"
-
-![Mac-privacy.png](readme-images/Mac-privacy.png)
 
 ### Running from Source (Development)
 
@@ -67,7 +70,7 @@ jpackage --name "Log Viewer" \
   --icon src/main/resources/icons/LogViewer.icns \
   --type dmg \
   --mac-package-name "Log Viewer" \
-  --app-version "2.0.0" \
+  --app-version "2.1.0" \
   --java-options "-Xdock:name='Log Viewer'" \
   --java-options "-Dapple.awt.application.name='Log Viewer'"
 ```

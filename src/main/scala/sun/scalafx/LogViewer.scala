@@ -191,6 +191,16 @@ object LogViewer extends JFXApp3 {
     val filterBar = UIComponents.createFilterBar(tabState)
     val statusBar = UIComponents.createStatusBar(tabState)
 
+    // Highlight bar with refresh callback
+    val highlightBar = UIComponents.createHighlightBar(tabState, () => {
+      UIComponents.refreshTableHighlights(logTable)
+    })
+
+    // Top section: filter bar + highlight bar
+    val topSection = new VBox {
+      children = Seq(filterBar, highlightBar)
+    }
+
     val mainContent = new SplitPane {
       orientation = Orientation.Vertical
       items ++= Seq(logTable, detailsPane)
@@ -198,7 +208,7 @@ object LogViewer extends JFXApp3 {
     }
 
     val tabContent = new BorderPane {
-      top = filterBar
+      top = topSection
       center = mainContent
       bottom = statusBar
     }
